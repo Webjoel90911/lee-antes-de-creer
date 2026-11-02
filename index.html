@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lee antes de creer · Asistente verificador</title>
+<link rel="icon" href="logo.jpg">
+<meta name="theme-color" content="#2b59ff">
+<meta name="description" content="Pega una noticia o sube una captura y el asistente te dice si parece verdadera, falsa o engañosa.">
+<style>
+:root{--bg:#f6f7fb;--card:#fff;--ink:#1d2433;--muted:#5d677d;--brand:#2b59ff;--brand2:#7a3cff;--line:#e3e7f0}
+*{box-sizing:border-box}
+html,body{max-width:100%;overflow-x:hidden}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);line-height:1.55}
+.hero{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;text-align:center;padding:44px 16px 64px}
+.hero .logo{display:block;width:132px;height:132px;margin:0 auto 14px;object-fit:contain;background:#fff;border-radius:22px;padding:6px;box-shadow:0 6px 20px rgba(0,0,0,.2)}
+.hero h1{margin:0 0 8px;font-size:clamp(1.8rem,6vw,2.8rem);line-height:1.1}
+.hero p{margin:0 auto;max-width:560px;opacity:.95}
+main{max-width:720px;margin:-40px auto 40px;padding:0 16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:0 4px 14px rgba(20,30,60,.06);margin-bottom:16px}
+textarea{width:100%;min-height:130px;resize:vertical;font:inherit;font-size:16px;padding:12px;border:1px solid var(--line);border-radius:12px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:10px}
+button{font:inherit;font-weight:700;border:0;border-radius:999px;padding:12px 20px;cursor:pointer}
+#go{background:var(--brand);color:#fff;flex:1 1 180px}
+#go:disabled{opacity:.55;cursor:wait}
+.g{background:#eef2ff;color:var(--brand)}
+.thumb{display:flex;align-items:center;gap:10px;margin-top:10px}
+.thumb img{height:64px;width:64px;object-fit:cover;border-radius:10px;border:1px solid var(--line)}
+.lnk{background:none;color:var(--muted);text-decoration:underline;padding:4px;font-weight:600;font-size:.85rem}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.badge{display:inline-block;font-weight:800;padding:6px 16px;border-radius:999px;font-size:1.05rem}
+.v-verdadero{background:#e8f8ee;color:#136a33}
+.v-falso{background:#fde8e8;color:#b42318}
+.v-enganoso{background:#fff3e6;color:#8a4600}
+.v-no_verificable{background:#eef0f6;color:#44506b}
+h3{margin:16px 0 6px;font-size:1rem}
+ul{margin:0;padding-left:20px}li{margin-bottom:4px}
+.src a{color:var(--brand);overflow-wrap:anywhere}
+.msg{color:var(--muted);text-align:center}
+.err{background:#fde8e8;color:#b42318;border-radius:12px;padding:12px 14px;font-weight:600}
+.note{font-size:.85rem;color:var(--muted);margin:10px 0 0}
+details summary{cursor:pointer;font-weight:800;color:var(--brand)}
+footer{text-align:center;color:var(--muted);font-size:.85rem;padding:0 16px 30px}
+@media(max-width:600px){.card{padding:14px}}
+</style>
+</head>
+<body>
+<header class="hero">
+  <img class="logo" src="logo.jpg" alt="Logo de Lee antes de creer">
+  <h1>Lee antes de creer</h1>
+  <p>Pega una noticia o sube una captura. El asistente la revisa y te dice si parece verdadera, falsa o engañosa.</p>
+</header>
+
+<main>
+  <div class="card">
+    <textarea id="txt" maxlength="3000" placeholder="Escribe o pega aquí la noticia, el mensaje de WhatsApp o lo que viste en TikTok…"></textarea>
+    <div class="thumb" id="thumb" hidden><img id="timg" alt="Captura"><button class="lnk" id="rm" type="button">Quitar captura</button></div>
+    <div class="row">
+      <label class="g" style="border-radius:999px;padding:12px 18px;font-weight:700;cursor:pointer">📷 Subir captura
+        <input class="sr" type="file" id="file" accept="image/*">
+      </label>
+      <button id="go" type="button">Verificar</button>
+    </div>
+    <p class="note">La IA puede equivocarse. Confirma siempre en las fuentes que te mostramos antes de compartir.</p>
+  </div>
+
+  <div id="out"></div>
+
+  <div class="card">
+    <details>
+      <summary>Antes de compartir, hazte estas 6 preguntas</summary>
+      <ul style="margin-top:10px">
+        <li>¿Quién lo publicó? ¿Es una persona o medio confiable?</li>
+        <li>¿Tiene fecha? ¿Es actual o es un hecho viejo que vuelve a circular?</li>
+        <li>¿Otros medios serios también lo publican?</li>
+        <li>¿Cita fuentes verificables (documentos, expertos, datos oficiales)?</li>
+        <li>¿Busca asustarme, enojarme o que lo reenvíe «urgente»?</li>
+        <li>¿La imagen o el video son reales? Prueba una búsqueda inversa de imagen.</li>
+      </ul>
+    </details>
+  </div>
+</main>
+<footer>Proyecto educativo «Lee antes de creer». Piensa, verifica y luego comparte.</footer>
+
+<script>
+/* ===== CONFIGURACIÓN: pega aquí la URL de tu Worker de Cloudflare ===== */
+const API_URL = 'https://verificador.joelcreoweb.workers.dev';
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const LABEL = {verdadero:'✅ Parece verdadero', falso:'❌ Parece falso', enganoso:'⚠️ Engañoso', no_verificable:'❔ No se pudo verificar'};
+let image = null;
+
+$('file').onchange = e => {
+  const f = e.target.files[0]; if(!f) return;
+  const rd = new FileReader();
+  rd.onload = () => {
+    const im = new Image();
+    im.onload = () => {
+      const k = Math.min(1, 1024 / Math.max(im.width, im.height));
+      const c = document.createElement('canvas');
+      c.width = Math.round(im.width * k); c.height = Math.round(im.height * k);
+      c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
+      image = c.toDataURL('image/jpeg', .8);
+      $('timg').src = image; $('thumb').hidden = false;
+    };
+    im.onerror = () => show('<div class="err">No pude leer esa imagen.</div>');
+    im.src = rd.result;
+  };
+  rd.readAsDataURL(f);
+};
+$('rm').onclick = () => { image = null; $('thumb').hidden = true; $('file').value = ''; };
+
+function show(html){ $('out').innerHTML = html; $('out').scrollIntoView({behavior:'smooth', block:'nearest'}); }
+const list = a => a && a.length ? '<ul>' + a.map(x => '<li>' + esc(x) + '</li>').join('') + '</ul>' : '';
+
+function render(d){
+  const f = d.fuentes && d.fuentes.length
+    ? '<h3>Fuentes para contrastar</h3><ul class="src">' + d.fuentes.map(s => '<li><a href="' + esc(s.url) + '" target="_blank" rel="noopener noreferrer">' + esc(s.titulo) + '</a></li>').join('') + '</ul>'
+    : '<h3>Fuentes</h3><p class="note">No se encontraron fuentes. Busca el tema en medios confiables o en verificadores como Maldita.es, Newtral o Chequeado.</p>';
+  show('<div class="card"><span class="badge v-' + esc(d.veredicto) + '">' + LABEL[d.veredicto] + '</span>' +
+    '<p style="margin:12px 0 0;font-weight:600">' + esc(d.resumen) + '</p>' +
+    (d.razones.length ? '<h3>¿Por qué?</h3>' + list(d.razones) : '') +
+    (d.senales.length ? '<h3>Señales de alerta</h3>' + list(d.senales) : '') +
+    (d.que_hacer ? '<h3>Qué hacer</h3><p style="margin:0">' + esc(d.que_hacer) + '</p>' : '') +
+    f + '</div>');
+}
+
+$('go').onclick = async () => {
+  const text = $('txt').value.trim();
+  if(!text && !image) return show('<div class="err">Escribe la noticia o sube una captura.</div>');
+  $('go').disabled = true; $('go').textContent = 'Revisando…';
+  show('<p class="msg">Buscando y comparando con fuentes… puede tardar unos segundos.</p>');
+  try{
+    const r = await fetch(API_URL, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({text, image})});
+    const d = await r.json().catch(() => ({}));
+    if(!r.ok) throw new Error(d.error || 'Error ' + r.status);
+    render(d);
+  }catch(e){
+    show('<div class="err">' + esc(e.message || 'No se pudo verificar. Intenta de nuevo.') + '</div>');
+  }
+  $('go').disabled = false; $('go').textContent = 'Verificar';
+};
+</script>
+</body>
+</html>
