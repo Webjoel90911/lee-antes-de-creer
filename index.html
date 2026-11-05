@@ -5,25 +5,26 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Lee antes de creer · Asistente verificador</title>
 <link rel="icon" href="logo.jpg">
-<meta name="theme-color" content="#2b59ff">
+<meta name="theme-color" content="#a8862a">
 <meta name="description" content="Pega una noticia o sube una captura y el asistente te dice si parece verdadera, falsa o engañosa.">
 <style>
-:root{--bg:#f6f7fb;--card:#fff;--ink:#1d2433;--muted:#5d677d;--brand:#2b59ff;--brand2:#7a3cff;--line:#e3e7f0}
+:root{--bg:#faf8f2;--card:#fff;--ink:#241f14;--muted:#6b624c;--brand:#8a6d1f;--brand2:#d4af37;--line:#ebe4d0}
 *{box-sizing:border-box}
 html,body{max-width:100%;overflow-x:hidden}
 body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);line-height:1.55}
-.hero{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;text-align:center;padding:44px 16px 64px}
-.hero .logo{display:block;width:132px;height:132px;margin:0 auto 14px;object-fit:contain;background:#fff;border-radius:22px;padding:6px;box-shadow:0 6px 20px rgba(0,0,0,.2)}
+.hero{background:linear-gradient(135deg,#6f5410,#b8942a 55%,var(--brand2));color:#fff;text-align:center;padding:44px 16px 64px;text-shadow:0 1px 3px rgba(40,28,0,.35)}
+.hero .logo{display:block;width:132px;height:132px;margin:0 auto 14px;object-fit:contain;background:#fff;border-radius:22px;padding:6px;box-shadow:0 6px 20px rgba(60,40,0,.3)}
 .hero h1{margin:0 0 8px;font-size:clamp(1.8rem,6vw,2.8rem);line-height:1.1}
-.hero p{margin:0 auto;max-width:560px;opacity:.95}
+.hero p{margin:0 auto;max-width:560px;opacity:.97}
 main{max-width:720px;margin:-40px auto 40px;padding:0 16px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:0 4px 14px rgba(20,30,60,.06);margin-bottom:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:0 4px 14px rgba(90,65,10,.08);margin-bottom:16px}
 textarea{width:100%;min-height:130px;resize:vertical;font:inherit;font-size:16px;padding:12px;border:1px solid var(--line);border-radius:12px}
+textarea:focus{outline:2px solid var(--brand2);outline-offset:1px}
 .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:10px}
 button{font:inherit;font-weight:700;border:0;border-radius:999px;padding:12px 20px;cursor:pointer}
-#go{background:var(--brand);color:#fff;flex:1 1 180px}
+#go{background:linear-gradient(135deg,#c9a227,#e2c35a);color:#2a2008;flex:1 1 180px;box-shadow:0 2px 8px rgba(138,109,31,.3)}
 #go:disabled{opacity:.55;cursor:wait}
-.g{background:#eef2ff;color:var(--brand)}
+.g{background:#fbf5e0;color:var(--brand)}
 .thumb{display:flex;align-items:center;gap:10px;margin-top:10px}
 .thumb img{height:64px;width:64px;object-fit:cover;border-radius:10px;border:1px solid var(--line)}
 .lnk{background:none;color:var(--muted);text-decoration:underline;padding:4px;font-weight:600;font-size:.85rem}
